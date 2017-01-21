@@ -8,43 +8,140 @@
 
 // Fonts from www.dafont.com/minecraft.font
 
+// Usar para cada botão 1 a 9 uma tag
+
 import UIKit
 import AVFoundation
 
 class ViewController: UIViewController {
     
-//    ButtonSound
-//    An instance of the AVAudioPlayer class,
-//    called an audio player, provides playback of
-//    audio data from a file or memory.
-    var buttonSound: AVAudioPlayer!
+    @IBOutlet weak var labelScreen: UILabel!
+    
+    // play/stop audio song
+    var buttonAudio: AVAudioPlayer!
+    // Current number to operations
+    var currentNum = ""
+    // Current operation to process
+    var currentOP = Operator.None
+    var leftNum = ""
+    var rightNum = ""
+    var result = ""
+    
+    // Creating a enum for the operators
+    enum Operator {
+        case Add
+        case Subtract
+        case Divide
+        case Multiply
+        case None
+    }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Path for the song file
+        // Create a path for the audio file
         let path = Bundle.main.path(forResource: "btn", ofType: "wav")
-        // Create an URL
-        let buttonURL = URL(fileURLWithPath: path!)
+        // Create a URL do the audio file
+        let audioURL = URL(fileURLWithPath: path!)
         
         do {
-            try buttonSound = AVAudioPlayer(contentsOf: buttonURL)
-            buttonSound.prepareToPlay()
+            try buttonAudio = AVAudioPlayer(contentsOf: audioURL)
+            // Prepare the sound to play
+            buttonAudio.prepareToPlay()
             
-        } catch let error as NSError{
+        } catch let error as NSError {
             print(error.debugDescription)
         }
     }
     
-    // Function that when the keys are pressed 
-    // plays the fuzzy song
+    // This funcrion is using only UIBUttons
+    // that represents nums
     @IBAction func buttonsPressed(sender: UIButton) {
-        // Just in case test stops the sound
-        if buttonSound.isPlaying {
-            buttonSound.stop()
+        
+        // Just in case...
+        if buttonAudio.isPlaying {
+            buttonAudio.stop()
         }
-        buttonSound.play()
+        buttonAudio.play()
+        
+        // Update current num
+        currentNum += "\(sender.tag)"
+        labelScreen.text = currentNum
+    }
+    
+    
+    // Updating the current Operator
+    // Using tag 50, 51 for operators buttons
+    @IBAction func operatorsReceived(sender: AnyObject) {
+        // Audio for buttons operators
+        buttonAudio.play()
+        // aux variable
+        var _auxOP = Operator.None
+        
+        switch sender.tag {
+        case 50:
+            _auxOP = Operator.Divide
+        case 51:
+            _auxOP = Operator.Multiply
+        case 52:
+            _auxOP = Operator.Subtract
+        case 53:
+            _auxOP = Operator.Add
+            
+        default:
+            break
+        }
+        
+        if currentOP == Operator.None {
+            leftNum = currentNum
+            currentNum = ""
+            currentOP = _auxOP
+        }
+        // Just in case user presses two times a operator button
+        else if leftNum != "" {
+            rightNum = currentNum
+            calculateFunc()
+            leftNum = result
+            currentOP = _auxOP
+            currentNum = ""
+        }
+    }
+    
+    // Proceed the cald with the elements
+    func calculateFunc() {
+
+        // Execute the oparation depending the operator
+        switch currentOP {
+        case Operator.Add:
+            result = "\(Double(leftNum)! + Double(rightNum)!)"
+        
+        case Operator.Multiply:
+            result = "\(Double(leftNum)! * Double(rightNum)!)"
+        
+        case Operator.Subtract:
+            result = "\(Double(leftNum)! - Double(rightNum)!)"
+        
+        case Operator.Divide:
+            result = "\(Double(leftNum)! / Double(rightNum)!)"
+            
+        default: break
+        }
+        labelScreen.text = result
+        // reset left and right nums
+        leftNum = ""
+        rightNum = ""
+        currentNum = result
+        currentOP = Operator.None
+    }
+    
+    @IBAction func equals(sender: UIButton) {
+        buttonAudio.play()
+        
+        if leftNum != "" && currentOP != Operator.None {
+            rightNum = currentNum
+            calculateFunc()
+        }
     }
 }
 
