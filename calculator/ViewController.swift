@@ -26,7 +26,7 @@ class ViewController: UIViewController {
     var leftNum = ""
     var rightNum = ""
     var result = ""
-    
+    var twoOP = false
     // Creating a enum for the operators
     enum Operator {
         case Add
@@ -37,8 +37,11 @@ class ViewController: UIViewController {
     }
     
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         // Create a path for the audio file
         let path = Bundle.main.path(forResource: "btn", ofType: "wav")
@@ -53,9 +56,10 @@ class ViewController: UIViewController {
         } catch let error as NSError {
             print(error.debugDescription)
         }
+        
     }
     
-    // This funcrion is using only UIBUttons
+    // This funcrion is using only UIButtons
     // that represents nums
     @IBAction func buttonsPressed(sender: UIButton) {
         
@@ -68,16 +72,19 @@ class ViewController: UIViewController {
         // Update current num
         currentNum += "\(sender.tag)"
         labelScreen.text = currentNum
+        
+        twoOP = twoOP ? false : twoOP
     }
     
     
     // Updating the current Operator
-    // Using tag 50, 51 for operators buttons
+    // Using tag 50, 51 for operator buttons
     @IBAction func operatorsReceived(sender: AnyObject) {
         // Audio for buttons operators
         buttonAudio.play()
         // aux variable
-        var _auxOP = Operator.None
+        var _auxOP: Operator!
+        
         
         switch sender.tag {
         case 50:
@@ -90,21 +97,25 @@ class ViewController: UIViewController {
             _auxOP = Operator.Add
             
         default:
-            break
+            _auxOP = Operator.None
         }
         
-        if currentOP == Operator.None {
-            leftNum = currentNum
-            currentNum = ""
-            currentOP = _auxOP
-        }
-        // Just in case user presses two times a operator button
-        else if leftNum != "" {
-            rightNum = currentNum
-            calculateFunc()
-            leftNum = result
-            currentOP = _auxOP
-            currentNum = ""
+        if !twoOP {
+            if currentOP == Operator.None {
+                leftNum = currentNum
+                currentNum = ""
+                currentOP = _auxOP
+            }
+                // Example: 2 + 2 + -> show 4 and wait for another number
+            else if leftNum != "" {
+                
+                rightNum = currentNum
+                calculateFunc()
+                leftNum = result
+                currentOP = _auxOP
+                currentNum = ""
+            }
+            twoOP = true
         }
     }
     
