@@ -119,6 +119,20 @@ class ViewController: UIViewController {
         }
     }
     
+    // Function to reset the calculator
+    @IBAction func clearPressed(sender: UIButton) {
+        // Turn on the terrible noise 
+        buttonAudio.play()
+        // Reset all the variables
+        leftNum = ""
+        rightNum = ""
+        currentNum = ""
+        currentOP = Operator.None
+        twoOP = false
+        result = ""
+        labelScreen.text = "0"
+    }
+    
     // Proceed the cald with the elements
     func calculateFunc() {
 
